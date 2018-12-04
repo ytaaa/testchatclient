@@ -9,7 +9,8 @@ CBuffer::CBuffer(const unsigned int nBufSize)
 	m_pReadNext = m_pBuf;
 	m_pWriteNext = m_pBuf;
 	m_pBufEnd = m_pBuf + nBufSize;
-	m_bEmpty = false;
+	m_bFull = false;
+	m_bEmpty = true;
 }
 
 
@@ -34,15 +35,25 @@ void CBuffer::AddBufSP(const char* pBuf, unsigned int unBufSize)
 		m_pWriteNext = m_pBuf + unBufSize - unFrontSize;
 	} while (0);
 
+	if (m_pWriteNext == m_pBufEnd)
+	{
+		m_pWriteNext = m_pBuf;
+	}
+
 	if (m_pWriteNext == m_pReadNext || (m_pBuf == m_pReadNext && m_pBufEnd == m_pWriteNext))
 	{
-		m_bEmpty = true;
+		m_bFull = true;
+	}
+
+	if (unBufSize != 0)
+	{
+		m_bEmpty = false;
 	}
 }
 
 bool CBuffer::AddBuf(const char* pBuf, unsigned int unBufSize)
 {
-	if (this->GetEmpytSize() + sizeof(unsigned int) < unBufSize)
+	if (this->GetEmpytSize() < unBufSize + sizeof(unsigned int))
 	{
 		return false;
 	}
@@ -72,18 +83,33 @@ void CBuffer::GetBufSP(char* szBuf, unsigned int unBufSize, bool bDel)
 		memcpy(szBuf + unFrontSize, m_pBuf, unBufSize - unFrontSize);
 		if (bDel)
 		{
-			m_pReadNext = m_pReadNext + unBufSize - unFrontSize;
+			m_pReadNext = m_pBuf + unBufSize - unFrontSize;
 		}
 	} while (0);
 
+	if (m_pReadNext == m_pBufEnd)
+	{
+		m_pReadNext = m_pBuf;
+	}
+
 	if (unBufSize != 0 && bDel)
 	{
-		m_bEmpty = false;
+		m_bFull = false;
+	}
+
+	if (m_pReadNext == m_pWriteNext)
+	{
+		m_bEmpty = true;
 	}
 }
 
 unsigned int CBuffer::GetBuf(char *szBuf, unsigned int unBufSize)
 {
+	if (m_bEmpty)
+	{
+		return 0;
+	}
+
 	unsigned int unSize = 0;
 	this->GetBufSP((char*)&unSize, sizeof(unsigned int), false);
 	if (unSize > unBufSize)
@@ -98,9 +124,14 @@ unsigned int CBuffer::GetBuf(char *szBuf, unsigned int unBufSize)
 
 unsigned int CBuffer::GetEmpytSize()
 {
-	if (m_bEmpty)
+	if (m_bFull)
 	{
 		return 0;
+	}
+
+	if (m_bEmpty)
+	{
+		return m_pBufEnd - m_pBuf;
 	}
 
 	if (m_pWriteNext > m_pReadNext)

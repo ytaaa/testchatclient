@@ -19,6 +19,7 @@ private:
 	char* m_pReadNext;
 	char* m_pWriteNext;
 	char* m_pBufEnd;
+	bool m_bFull;
 	bool m_bEmpty;
 
 private:

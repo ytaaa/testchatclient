@@ -13,7 +13,7 @@ int main(int argc, char* argv[])
 	char buf[100];
 	CBuffer* pBuffer = new CBuffer(51);
 	fopen_s(&pFile, "testData", "r");
-	int testcount = 1000000;
+	int testcount = 1000;
 	char cmd[20];
 	FILE* pResult;
 	fopen_s(&pResult, "resbuf", "w");

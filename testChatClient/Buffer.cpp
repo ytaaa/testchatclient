@@ -97,7 +97,7 @@ void CBuffer::GetBufSP(char* szBuf, unsigned int unBufSize, bool bDel)
 		m_bFull = false;
 	}
 
-	if (m_pReadNext == m_pWriteNext)
+	if (m_pReadNext == m_pWriteNext && bDel)
 	{
 		m_bEmpty = true;
 	}
